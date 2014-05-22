@@ -32,9 +32,9 @@ func TestGenerateStartUrls(t *testing.T) {
   urls := make([]string, 0)
   go retrieveUrls(&urls, scheduler, "listing")
   scheduler.Wait()
-  expect(t, urls[0], "http://www.example.com/1")
-  expect(t, urls[1], "http://www.example.com/2")
-  expect(t, urls[2], "http://www.example.com/3")
+  expect("url 1", t, urls[0], "http://www.example.com/1")
+  expect("url 2", t, urls[1], "http://www.example.com/2")
+  expect("url 3", t, urls[2], "http://www.example.com/3")
 }
 
 func TestAddListingQueue(t *testing.T) {
@@ -51,9 +51,9 @@ func TestAddListingQueue(t *testing.T) {
   urls := make([]string, 0)
   go retrieveUrls(&urls, scheduler, "listing")
   scheduler.Wait()
-  expect(t, len(urls), len(expectedUrls))
+  expect("url length", t, len(urls), len(expectedUrls))
   for i := 0; i < len(expectedUrls); i++ {
-    expect(t, urls[i], expectedUrls[i])
+    expect("url", t, urls[i], expectedUrls[i])
   }
 }
 
@@ -71,8 +71,8 @@ func TestAddContentQueue(t *testing.T) {
   urls := make([]string, 0)
   go retrieveUrls(&urls, scheduler, "content")
   scheduler.Wait()
-  expect(t, len(urls), len(expectedUrls))
+  expect("url length", t, len(urls), len(expectedUrls))
   for i := 0; i < len(expectedUrls); i++ {
-    expect(t, urls[i], expectedUrls[i])
+    expect("url", t, urls[i], expectedUrls[i])
   }
 }

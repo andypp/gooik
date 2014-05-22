@@ -13,18 +13,17 @@ func TestNewRequest(t *testing.T) {
   fragment := "123"
 
   req := NewRequest(fmt.Sprintf("%v://%v", scheme, host))
-  refute(t, req, (*Request)(nil))
+  refute("request 1", t, req, (*Request)(nil))
 
   req = NewRequest(fmt.Sprintf("%v://%v%v?%v#%v", scheme, host, path, query, fragment))
-  refute(t, req, (*Request)(nil))
-  expect(t, req.Url.Scheme, scheme)
-  expect(t, req.Url.Host, host)
-  expect(t, req.Url.Path, path)
-  expect(t, req.Url.RawQuery, query)
-  expect(t, req.Url.Fragment, fragment)
+  expect("scheme", t, req.Url.Scheme, scheme)
+  expect("host", t, req.Url.Host, host)
+  expect("path", t, req.Url.Path, path)
+  expect("query", t, req.Url.RawQuery, query)
+  expect("fragment", t, req.Url.Fragment, fragment)
 
   req = NewRequest("this-is-invalid-url")
-  expect(t, req, (*Request)(nil))
+  expect("request 2", t, req, (*Request)(nil))
 }
 
 func TestResponseBaseUrl(t *testing.T) {
@@ -34,5 +33,5 @@ func TestResponseBaseUrl(t *testing.T) {
     Url: req.Url,
     Content: "this is some content string",
   }
-  expect(t, res.BaseUrl(), "http://www.example.com")
+  expect("base url", t, res.BaseUrl(), "http://www.example.com")
 }

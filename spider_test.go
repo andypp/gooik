@@ -119,7 +119,7 @@ func TestSingleListingHandler(t *testing.T) {
   )
   spider.Start()
 
-  expect(t, len(urls), 4)
+  expect("url length", t, len(urls), 4)
 }
 
 
@@ -135,7 +135,7 @@ func TestDoubleListingHandler(t *testing.T) {
   )
   spider.Start()
 
-  expect(t, len(urls), 3)
+  expect("url length", t, len(urls), 3)
 }
 
 func TestTripleListingHandler(t *testing.T) {
@@ -151,7 +151,7 @@ func TestTripleListingHandler(t *testing.T) {
   )
   spider.Start()
 
-  expect(t, len(urls), 0)
+  expect("url length", t, len(urls), 0)
 }
 
 func TestListingContentHandler(t *testing.T) {
@@ -165,5 +165,5 @@ func TestListingContentHandler(t *testing.T) {
   )
   spider.Start()
 
-  expect(t, len(urls), 4)
+  expect("url length", t, len(urls), 4)
 }

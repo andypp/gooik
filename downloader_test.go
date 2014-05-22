@@ -32,25 +32,24 @@ func TestNetDownloader(t *testing.T) {
   req := NewRequest(reqUrl)
 
   res := downloader.Download(*req)
-  refute(t, res, (*Response)(nil))
-  expect(t, res.Url.String(), reqUrl)
-  expect(t, res.Content, bodyString)
+  expect("url", t, res.Url.String(), reqUrl)
+  expect("content", t, res.Content, bodyString)
 
   req404 := NewRequest(reqUrl + "&sts=404")
 
   res404 := downloader.Download(*req404)
-  expect(t, res404, (*Response)(nil))
+  expect("response", t, res404, (*Response)(nil))
 }
 
 func TestCacheFileName(t *testing.T) {
   cacheFn := GetCacheFileName("http://www.example.com")
-  expect(t, cacheFn, "http-www-example-com.html")
+  expect("cache file 1", t, cacheFn, "http-www-example-com.html")
 
   cacheFn = GetCacheFileName("http://www.example.com?walk=tes++++12")
-  expect(t, cacheFn, "http-www-example-com-walk-tes-.html")
+  expect("cache file 2", t, cacheFn, "http-www-example-com-walk-tes-.html")
 
   cacheFn = GetCacheFileName("http://www.gle.com?walk=test+.....+++++12")
-  expect(t, cacheFn, "http-www-gle-com-walk-test-12.html")
+  expect("cache file 3", t, cacheFn, "http-www-gle-com-walk-test-12.html")
 }
 
 func TestMockDownloader(t *testing.T) {
@@ -60,14 +59,13 @@ func TestMockDownloader(t *testing.T) {
   req := NewRequest(rawUrl)
 
   res := downloader.Download(*req)
-  refute(t, res, (*Response)(nil))
-  expect(t, res.Url.String(), rawUrl)
+  expect("url", t, res.Url.String(), rawUrl)
 
   trimmedContent := strings.Trim(res.Content, " \n")
-  expect(t, trimmedContent, "This is a dummy content")
+  expect("content", t, trimmedContent, "This is a dummy content")
 
   rawUrl = "http://testing.cache?file21"
   req = NewRequest(rawUrl)
   res = downloader.Download(*req)
-  expect(t, res, (*Response)(nil))
+  expect("response", t, res, (*Response)(nil))
 }

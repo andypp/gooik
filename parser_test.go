@@ -23,14 +23,14 @@ func TestLinkParser(t *testing.T) {
   }
 
   nextReq, contentReqs := parser.Handle(con)
-  expect(t, nextReq, (*ContentRequest)(nil))
+  expect("next request 1", t, nextReq, (*ContentRequest)(nil))
   urls := make([]interface{}, 0)
 
   for contentReq := range contentReqs {
-    expect(t, contentReq.Req, (*Request)(nil))
+    expect("content request 1", t, contentReq.Req, (*Request)(nil))
     urls = append(urls, contentReq.Req)
   }
-  expect(t, len(urls), 3)
+  expect("url length 1", t, len(urls), 3)
 
   re = regexp.MustCompile(`<a class="bluelink" href="([^"]+/listing/[^"]+)">`)
   parser = NewLinkParser(re)
@@ -42,18 +42,18 @@ func TestLinkParser(t *testing.T) {
   `
 
   nextReq, contentReqs = parser.Handle(con)
-  expect(t, nextReq, (*ContentRequest)(nil))
+  expect("next request 2", t, nextReq, (*ContentRequest)(nil))
 
   urls = nil
 
   for contentReq := range contentReqs {
-    refute(t, contentReq.Req, (*ContentRequest)(nil))
+    refute("content request 2", t, contentReq.Req, (*ContentRequest)(nil))
     urls = append(urls, contentReq.Req.Url.String())
   }
-  expect(t, len(urls), 3)
+  expect("url length 2", t, len(urls), 3)
 
 
-  expect(t, urls[0], "http://www.example.com/listing/abcd")
-  expect(t, urls[1], "http://www.example.com/listing/efgh/ijkl")
-  expect(t, urls[2], "http://www.example.com/listing/12345")
+  expect("url 1", t, urls[0], "http://www.example.com/listing/abcd")
+  expect("url 2", t, urls[1], "http://www.example.com/listing/efgh/ijkl")
+  expect("url 3", t, urls[2], "http://www.example.com/listing/12345")
 }
