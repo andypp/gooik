@@ -57,6 +57,7 @@ func TestMockDownloader(t *testing.T) {
 
   rawUrl := "http://testing.cache?file"
   req := NewRequest(rawUrl)
+  // http-testing-cache-file.html
 
   res := downloader.Download(*req)
   expect("url", t, res.Url.String(), rawUrl)

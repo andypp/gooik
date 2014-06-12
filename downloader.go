@@ -1,7 +1,6 @@
 package gooik
 
 import(
-  "fmt"
   "io/ioutil"
   "net/http"
   "regexp"
@@ -35,8 +34,6 @@ func NewNetDownloader() *NetDownloader {
 // Download url from web, with GET method, returns the body as string
 func (d *NetDownloader) Download(req Request) *Response {
   // TODO: save download to cache
-
-  fmt.Println("Downloading...", req.Url)
   response, err := http.Get(req.Url.String())
   if err != nil {
     return nil
@@ -70,8 +67,6 @@ func NewMockDownloader(baseDir string) *MockDownloader {
 
 // Read file content, sleep to emulate download time
 func (d *MockDownloader) Download(req Request) *Response {
-  fmt.Println("Reading...", req.Url)
-
   // Simulate download time
   time.Sleep(500 * time.Millisecond)
 

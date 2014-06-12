@@ -1,6 +1,7 @@
 package gooik
 
 import (
+  "math"
   "testing"
 )
 
@@ -22,17 +23,17 @@ func newDummyHandlerZero() dummyHandlerZero {
 // Copy urls from input urls to returned urls
 type dummyHandlerOne struct {
   BaseHandler
-  ReturnedUrls *[]string
+  ReturnedUrls map[string]struct{}
   InputUrls []string
 }
 
 func (h dummyHandlerOne) GenerateChan(con *ContentRequest, channel chan<- *ContentRequest) {
   for _, url := range h.InputUrls {
-    *h.ReturnedUrls = append(*h.ReturnedUrls, url)
+    h.ReturnedUrls[url] = struct{}{}
   }
 }
 
-func newDummyHandlerOne(ret *[]string, inp []string) dummyHandlerOne {
+func newDummyHandlerOne(ret map[string]struct{}, inp []string) dummyHandlerOne {
   d := dummyHandlerOne{
     ReturnedUrls: ret,
     InputUrls: inp,
@@ -41,19 +42,27 @@ func newDummyHandlerOne(ret *[]string, inp []string) dummyHandlerOne {
   return d
 }
 
-// Take the first three elements from returned urls
+// Take the first maxElem elements from returned urls
 type dummyHandlerTwo struct {
   BaseHandler
-  ReturnedUrls *[]string
+  ReturnedUrls map[string]struct{}
+  maxElem int
 }
 
 func (h dummyHandlerTwo) GenerateChan(con *ContentRequest, channel chan<- *ContentRequest) {
-  *h.ReturnedUrls = (*h.ReturnedUrls)[0:3]
+  i := 0
+  for key := range h.ReturnedUrls {
+    if i >= h.maxElem {
+      delete(h.ReturnedUrls, key)
+    }
+    i++
+  }
 }
 
-func newDummyHandlerTwo(ret *[]string) dummyHandlerTwo {
+func newDummyHandlerTwo(ret map[string]struct{}, max int) dummyHandlerTwo {
   d := dummyHandlerTwo{
     ReturnedUrls: ret,
+    maxElem: max,
   }
   d.Handler = d
   return d
@@ -84,14 +93,14 @@ func newDummyHandlerThree(inp []string) dummyHandlerThree {
 // Append content requests to returned urls
 type dummyHandlerFour struct {
   BaseHandler
-  ReturnedUrls *[]string
+  ReturnedUrls map[string]struct{}
 }
 
 func (h dummyHandlerFour) GenerateChan(con *ContentRequest, channel chan<- *ContentRequest) {
-  *h.ReturnedUrls = append(*h.ReturnedUrls, con.Req.Url.String())
+  h.ReturnedUrls[con.Req.Url.String()] = struct{}{}
 }
 
-func newDummyHandlerFour(ret *[]string) dummyHandlerFour {
+func newDummyHandlerFour(ret map[string]struct{}) dummyHandlerFour {
   d := dummyHandlerFour{
     ReturnedUrls: ret,
   }
@@ -105,49 +114,57 @@ var (
     "http://www.example.com/2",
     "http://www.example.com/3",
     "http://www.example.com/4",
+    "http://www.example.com/5",
+    "http://www.example.com/6",
+    "http://www.example.com/7",
+    "http://www.example.com/8",
+    "http://www.example.com/9",
   }
 )
 
 func TestSingleListingHandler(t *testing.T) {
   spider := NewListingSpider("http://www.example.com")
-  urls := make([]string, 0)
+  urls := make(map[string]struct{})
   spider.AddListingHandler(
     newDummyHandlerOne(
-      &urls,
+      urls,
       expectedUrls,
     ),
   )
   spider.Start()
 
-  expect("url length", t, len(urls), 4)
+  for _, url := range expectedUrls {
+    _, ok := urls[url]
+    expect("url found", t, ok, true)
+  }
 }
 
 
 func TestDoubleListingHandler(t *testing.T) {
   spider := NewListingSpider("http://www.example.com")
-  urls := make([]string, 0)
+  urls := make(map[string]struct{})
   spider.SetListingHandlers(
     newDummyHandlerOne(
-      &urls,
+      urls,
       expectedUrls,
     ),
-    newDummyHandlerTwo(&urls),
+    newDummyHandlerTwo(urls, 3),
   )
   spider.Start()
 
-  expect("url length", t, len(urls), 3)
+  expect("url length", t, len(urls), int(math.Min(3, float64(len(expectedUrls)))))
 }
 
 func TestTripleListingHandler(t *testing.T) {
   spider := NewListingSpider("http://www.example.com")
-  urls := make([]string, 0)
+  urls := make(map[string]struct{})
   spider.SetListingHandlers(
     newDummyHandlerZero(),
     newDummyHandlerOne(
-      &urls,
+      urls,
       expectedUrls,
     ),
-    newDummyHandlerTwo(&urls),
+    newDummyHandlerTwo(urls, 3),
   )
   spider.Start()
 
@@ -156,14 +173,17 @@ func TestTripleListingHandler(t *testing.T) {
 
 func TestListingContentHandler(t *testing.T) {
   spider := NewListingSpider("http://www.example.com")
-  urls := make([]string, 0)
+  urls := make(map[string]struct{})
   spider.SetListingHandlers(
     newDummyHandlerThree(expectedUrls),
   )
   spider.AddContentHandler(
-    newDummyHandlerFour(&urls),
+    newDummyHandlerFour(urls),
   )
   spider.Start()
 
-  expect("url length", t, len(urls), 4)
+  for _, url := range expectedUrls {
+    _, ok := urls[url]
+    expect("url found", t, ok, true)
+  }
 }

@@ -67,7 +67,11 @@ func (s *Spider) Start() {
   // Process all items in content queue
   go func() {
     for con := range s.scheduler.ContentQueue() {
-      go s.handleContent(&con)
+      // Copy request, and pass pointer to the copy
+      // this is to avoid all goroutines in this iteration
+      // processing the same request
+      temp := con
+      go s.handleContent(&temp)
     }
   }()
 
