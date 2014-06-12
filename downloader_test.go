@@ -2,8 +2,9 @@ package gooik
 
 import (
   "fmt"
-	"net/http"
+  "net/http"
   "net/http/httptest"
+  "os"
   "strings"
   "testing"
 )
@@ -57,7 +58,15 @@ func TestMockDownloader(t *testing.T) {
 
   rawUrl := "http://testing.cache?file"
   req := NewRequest(rawUrl)
-  // http-testing-cache-file.html
+
+  tmp, err := os.Create(GetCacheFileName(rawUrl))
+  if err != nil {
+    t.Fatal(err)
+  }
+  defer os.Remove(tmp.Name())
+  fmt.Fprintf(tmp, "This is a dummy content\n")
+  tmp.Sync()
+  tmp.Seek(0, 0)
 
   res := downloader.Download(*req)
   expect("url", t, res.Url.String(), rawUrl)
